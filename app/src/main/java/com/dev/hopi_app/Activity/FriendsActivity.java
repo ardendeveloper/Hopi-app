@@ -28,7 +28,9 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class FriendsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -43,7 +45,7 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
     ArrayList<Friends> mAdapterItems = null;
     ArrayList<String> mAdapterKeys;
     SharedPreferences sharedPref;
-
+    Firebase myFirebaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,20 +54,19 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedPref.edit();
+        sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_friends);
         navigationView.setNavigationItemSelectedListener(this);
 
         Firebase.setAndroidContext(this);
+        myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
         mQuery = new Firebase("https://hopiiapp.firebaseio.com/friends/"+sharedPref.getString("userID",""));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_users);
@@ -120,7 +121,12 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
                                             sharedPref.getString("userID","")+userId);
                                     friendRef.push().setValue(newFriend);
 
-                                    Firebase chatRef = new Firebase("https://hopiiapp.firebaseio.com/messages/"+userId);
+                                    String timeStamp = new SimpleDateFormat("MMM dd, yyyy - h:mm a").format(new Date());
+                                    Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
+                                    Firebase tempRef = auditRef.push();
+                                    tempRef.child("action").setValue("Accepted Friend Request: \n From: "+user.getFirstName() +" "+user.getLastName()+ "\n To: "+ sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
+                                    tempRef.child("user").setValue(sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
+                                    tempRef.child("timestamp").setValue(timeStamp);
 
                                     Toast.makeText(FriendsActivity.this, "You are now friends with "+user.getFirstName(), Toast.LENGTH_SHORT).show();
                                 }
@@ -182,8 +188,27 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy(){
         super.onDestroy();
-        mMyAdapter.destroy();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(FriendsActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("online");
+        Toast.makeText(FriendsActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(FriendsActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+    }
+
 }

@@ -11,8 +11,9 @@ public class Users {
     private String studentNumber;
     private String userID;
     private String pushID;
+    private String status;
 
-    public Users(String email, String password, String firstName, String lastName, String studentNumber, String userID, String pushID) {
+    public Users(String email, String password, String firstName, String lastName, String studentNumber, String userID, String pushID,String status) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
@@ -20,6 +21,7 @@ public class Users {
         this.studentNumber = studentNumber;
         this.userID = userID;
         this.pushID = pushID;
+        this.status = status;
     }
 
     public Users(){}
@@ -78,5 +80,13 @@ public class Users {
 
     public void setStudentNumber(String studentNumber) {
         this.studentNumber = studentNumber;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

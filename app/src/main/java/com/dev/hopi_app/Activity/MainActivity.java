@@ -14,9 +14,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.dev.hopi_app.Friends;
 import com.dev.hopi_app.LoginActivity;
 import com.dev.hopi_app.R;
+import com.dev.hopi_app.Users;
 import com.firebase.client.Firebase;
 
 public class MainActivity extends AppCompatActivity
@@ -140,4 +143,29 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(MainActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(MainActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("online");
+        Toast.makeText(MainActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+    }
+
 }

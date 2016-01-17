@@ -22,12 +22,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dev.hopi_app.Activity.MainActivity;
+import com.dev.hopi_app.Admin.AdminMainActivity;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * A login screen that offers login via email/password.
@@ -46,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
     private Firebase myFirebaseRef;
     SharedPreferences sharedPref;
     SharedPreferences.Editor editor;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,11 +89,6 @@ public class LoginActivity extends AppCompatActivity {
         myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
     }
 
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -110,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
-        }else if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        } else if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -150,9 +150,6 @@ public class LoginActivity extends AppCompatActivity {
         return password.length() > 4;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -186,14 +183,11 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
+        private String txtEmail, txtPassword, txtFirstname, txtLastname, txtStudentnumber;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -207,10 +201,10 @@ public class LoginActivity extends AppCompatActivity {
             myFirebaseRef.authWithPassword(mEmail, mPassword, new Firebase.AuthResultHandler() {
                 @Override
                 public void onAuthenticated(AuthData authData) {
-
                     //Save data to local storage
+                    Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_SHORT).show();
                     Query queryRef = myFirebaseRef.orderByChild("userID").equalTo(authData.getUid());
-                    queryRef.addValueEventListener(new ValueEventListener() {
+                    queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot snapshot) {
                             System.out.println("There are " + snapshot.getChildrenCount() + " User/s");
@@ -220,33 +214,44 @@ public class LoginActivity extends AppCompatActivity {
 
                                 editor.clear();
                                 editor.commit();
-
-                                editor.putString("email",user.getEmail());
-                                editor.putString("firstName",user.getFirstName());
-                                editor.putString("lastName",user.getLastName());
-                                editor.putString("studentNumber",user.getStudentNumber());
-                                editor.putString("userID",user.getUserID());
-                                editor.putString("password",user.getPassword());
-                                editor.putString("pushID",user.getPushID());
+                                editor.putString("email", user.getEmail());
+                                editor.putString("firstName", user.getFirstName());
+                                editor.putString("lastName", user.getLastName());
+                                editor.putString("studentNumber", user.getStudentNumber());
+                                editor.putString("userID", user.getUserID());
+                                editor.putString("password", user.getPassword());
+                                editor.putString("pushID", user.getPushID());
                                 editor.apply();
 
-                                Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                                intent.putExtra(extra_name, user.getFirstName()+" "+user.getLastName());
-                                intent.putExtra(extra_email, user.getEmail());
-                                intent.putExtra(extra_studentnumber, user.getStudentNumber());
-                                startActivity(intent);
-                                Toast.makeText(LoginActivity.this, "Welcome ! "+user.getFirstName(), Toast.LENGTH_SHORT).show();
-                                finish();
+                                txtEmail = user.getEmail();
+                                txtPassword = user.getPassword();
+                                txtFirstname = user.getFirstName();
+                                txtLastname = user.getLastName();
+                                txtStudentnumber = user.getStudentNumber();
 
+                                if (mEmail.equals("admin@admin.com")) {
+                                    intent = new Intent(getBaseContext(), AdminMainActivity.class);
+                                } else {
+                                    intent = new Intent(getBaseContext(), MainActivity.class);
+
+                                }
+                                intent.putExtra(extra_name, txtFirstname + " " + txtLastname);
+                                intent.putExtra(extra_email, txtEmail);
+                                intent.putExtra(extra_studentnumber, txtStudentnumber);
+                                startActivity(intent);
+
+                                Toast.makeText(LoginActivity.this, "Welcome ! " + txtFirstname, Toast.LENGTH_SHORT).show();
+                                finish();
                             }
                         }
+
                         @Override
                         public void onCancelled(FirebaseError firebaseError) {
                             System.out.println("The read failed: " + firebaseError.getMessage());
                         }
                     });
-//                    Toast.makeText(LoginActivity.this, "Login Successful!"+authData.getUid()+" - "+ authData.getProvider(), Toast.LENGTH_SHORT).show();
                 }
+
                 @Override
                 public void onAuthenticationError(FirebaseError firebaseError) {
                     Toast.makeText(LoginActivity.this, "Login Error!", Toast.LENGTH_SHORT).show();
@@ -270,6 +275,12 @@ public class LoginActivity extends AppCompatActivity {
 
             //Login Successful
             if (success) {
+//                String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
+//                Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
+//                Firebase tempRef = auditRef.push();
+//                tempRef.child("action").setValue("Logged in: "+txtFirstname+" "+txtLastname+" .");
+//                tempRef.child("user").setValue(txtFirstname+" "+txtLastname);
+//                tempRef.child("timestamp").setValue(timeStamp);
 
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
@@ -284,7 +295,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void showSignup(View view){
+    public void showSignup(View view) {
         Intent intent = new Intent(this, SignupActivity.class);
         startActivity(intent);
     }

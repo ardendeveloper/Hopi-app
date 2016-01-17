@@ -1,6 +1,7 @@
 package com.dev.hopi_app.Adapter;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -8,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dev.hopi_app.Activity.ProfileActivity;
 import com.dev.hopi_app.Firebase.FirebaseRecyclerAdapter;
@@ -19,7 +19,7 @@ import com.firebase.client.Query;
 import java.util.ArrayList;
 
 
-public class UserAdapter extends FirebaseRecyclerAdapter<UserAdapter.ViewHolder, Users> {
+public class OnlineAdapter extends FirebaseRecyclerAdapter<OnlineAdapter.ViewHolder, Users> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView cardName;
@@ -36,24 +36,25 @@ public class UserAdapter extends FirebaseRecyclerAdapter<UserAdapter.ViewHolder,
         }
     }
 
-    public UserAdapter(Query query, Class<Users> itemClass, @Nullable ArrayList<Users> items,
-                     @Nullable ArrayList<String> keys) {
+    public OnlineAdapter(Query query, Class<Users> itemClass, @Nullable ArrayList<Users> items,
+                         @Nullable ArrayList<String> keys) {
         super(query, itemClass, items, keys);
     }
 
-    @Override public UserAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    @Override public OnlineAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_users, parent, false);
 
         return new ViewHolder(view);
     }
 
-    @Override public void onBindViewHolder(UserAdapter.ViewHolder holder, int position) {
+    @Override public void onBindViewHolder(OnlineAdapter.ViewHolder holder, int position) {
         final Users item = getItem(position);
         holder.cardName.setText(item.getFirstName()+" "+item.getLastName());
         holder.cardEmail.setText(item.getEmail());
         holder.cardStudentNumber.setText(item.getStudentNumber());
         holder.cardStatus.setText(item.getStatus());
+        holder.cardStatus.setTextColor(Color.GREEN);
 
         holder.cardName.setOnClickListener(new View.OnClickListener() {
             @Override

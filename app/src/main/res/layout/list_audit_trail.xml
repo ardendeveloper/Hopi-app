@@ -28,14 +28,15 @@
 
             <ImageView
                 android:id="@+id/thumbnail"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:scaleType="centerCrop"
                 android:background="#fff"
                 android:padding="2dp"
-                android:src="@mipmap/ic_launcher" />
+                android:src="@android:drawable/ic_dialog_info"
+                android:tint="#9e9e9e"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -45,18 +46,17 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/cardName"
+                    android:id="@+id/cardAction"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingLeft="8dp"
                     android:text="Name"
                     android:textColor="#222"
-                    android:textSize="18sp"
+                    android:textSize="17sp"
                     android:textStyle="bold" />
 
-
                 <TextView
-                    android:id="@+id/cardEmail"
+                    android:id="@+id/cardUser"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -66,24 +66,15 @@
                     android:textSize="15dp" />
 
                 <TextView
-                    android:id="@+id/cardStudentNumber"
+                    android:id="@+id/cardDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:paddingLeft="8dp"
-                    android:text="Student Number"
+                    android:text="Date"
                     android:textColor="#222"
                     android:textSize="15dp" />
 
-                <TextView
-                    android:id="@+id/cardStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:paddingLeft="8dp"
-                    android:text="Offline"
-                    android:textColor="#FF0000"
-                    android:textSize="15dp" />
             </LinearLayout>
         </RelativeLayout>
     </RelativeLayout>

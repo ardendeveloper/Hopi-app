@@ -27,15 +27,19 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ChatActivity extends AppCompatActivity {
 
     public static String TAG = "FirebaseUI.chat";
     Firebase mRef;
-     Query mChatRef;
-     String mName;
-     Button mSendButton;
-     EditText mMessageEdit;
+    Query mChatRef;
+    Button mSendButton;
+    EditText mMessageEdit;
     SharedPreferences sharedPref;
+    String roomID;
+    Firebase myFirebaseRef;
 
      RecyclerView mMessages;
      FirebaseRecyclerAdapter1<Chat, ChatHolder> mRecycleViewAdapter;
@@ -45,7 +49,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_recycler);
 
-
+        myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         mSendButton = (Button) findViewById(R.id.sendButton);
         mMessageEdit = (EditText) findViewById(R.id.messageEdit);
@@ -54,7 +58,7 @@ public class ChatActivity extends AppCompatActivity {
         Intent text = getIntent();
         final Bundle friend = text.getExtras();
         if(friend != null){
-            String roomID =(String) friend.get("room_id");
+            roomID =(String) friend.get("room_id");
             Toast.makeText(ChatActivity.this, roomID, Toast.LENGTH_SHORT).show();
             mRef = new Firebase("https://hopiiapp.firebaseio.com/messages/"+roomID);
             mChatRef = mRef.limitToLast(50);
@@ -62,7 +66,6 @@ public class ChatActivity extends AppCompatActivity {
             mRef = new Firebase("https://hopiiapp.firebaseio.com/chat-room/");
             mChatRef = mRef.limitToLast(50);
         }
-
 
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,7 +79,17 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+                String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
+                Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
+                Firebase tempRef = auditRef.push();
+                tempRef.child("action").setValue("New Message: "+ mMessageEdit.getText().toString() +" has been sent");
+                tempRef.child("user").setValue(sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
+                tempRef.child("timestamp").setValue(timeStamp);
+
                 mMessageEdit.setText("");
+
+
             }
         });
 
@@ -119,7 +132,6 @@ public class ChatActivity extends AppCompatActivity {
             RelativeLayout messageContainer = (RelativeLayout) mView.findViewById(R.id.message_container);
             LinearLayout message = (LinearLayout) mView.findViewById(R.id.message);
 
-
             if (isSender) {
                 left_arrow.setVisibility(View.GONE);
                 right_arrow.setVisibility(View.VISIBLE);
@@ -141,4 +153,29 @@ public class ChatActivity extends AppCompatActivity {
             field.setText(text);
         }
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(ChatActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("online");
+        Toast.makeText(ChatActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(ChatActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+    }
+
 }

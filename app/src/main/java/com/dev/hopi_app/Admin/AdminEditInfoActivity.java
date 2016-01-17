@@ -1,4 +1,4 @@
-package com.dev.hopi_app.Activity;
+package com.dev.hopi_app.Admin;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -16,6 +16,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.dev.hopi_app.Activity.ProfileActivity;
 import com.dev.hopi_app.R;
 import com.dev.hopi_app.Users;
 import com.firebase.client.DataSnapshot;
@@ -30,7 +31,7 @@ import java.util.Date;
 /**
  * A login screen that offers login via email/password.
  */
-public class EditInfoActivity extends AppCompatActivity {
+public class AdminEditInfoActivity extends AppCompatActivity {
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -43,7 +44,9 @@ public class EditInfoActivity extends AppCompatActivity {
     private View mLoginFormView;
     private Firebase myFirebaseRef;
     SharedPreferences sharedPref;
+    private String userId, pushId;
     String oldFirstName, oldLastname, oldEmail, oldStudentNumber, oldPassword;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,41 +81,47 @@ public class EditInfoActivity extends AppCompatActivity {
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
 
-//         UPDATING DRAFT
-        Query queryRef = myFirebaseRef.orderByChild("userID").equalTo(sharedPref.getString("userID",""));
-        queryRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                System.out.println("There are " + snapshot.getChildrenCount() + " User/s");
-                System.out.println("KEEEEEEEEEEEEEEEEEEEEEEEEEEY "+snapshot.getValue());
-                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                    Users user = postSnapshot.getValue(Users.class);
-                    System.out.println(user.getStudentNumber() + " - " + user.getEmail() + " - " + user.getPassword() + " - " + user.getFirstName() + " - " + user.getLastName());
-                    email.setText(user.getEmail());
-                    password.setText(user.getPassword());
-                    firstName.setText(user.getFirstName());
-                    lastName.setText(user.getLastName());
-                    studentNumber.setText((user.getStudentNumber()));
+        Intent text = getIntent();
+        final Bundle b = text.getExtras();
+        if(b!=null) {
+            userId = (String) b.get("USER_ID");
+            Query queryRef = myFirebaseRef.orderByChild("userID").equalTo(userId);
+            queryRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
 
-                    oldEmail = user.getEmail();
-                    oldFirstName = user.getFirstName();
-                    oldLastname = user.getLastName();
-                    oldPassword = user.getPassword();
-                    oldStudentNumber = user.getStudentNumber();
+                    for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                        Users user = postSnapshot.getValue(Users.class);
+                        System.out.println(user.getStudentNumber() + " - " + user.getEmail() + " - " + user.getPassword() + " - " + user.getFirstName() + " - " + user.getLastName());
+                        email.setText(user.getEmail());
+                        password.setText(user.getPassword());
+                        firstName.setText(user.getFirstName());
+                        lastName.setText(user.getLastName());
+                        studentNumber.setText((user.getStudentNumber()));
 
+                        pushId = user.getPushID();
+                        oldEmail = user.getEmail();
+                        oldFirstName = user.getFirstName();
+                        oldLastname = user.getLastName();
+                        oldPassword = user.getPassword();
+                        oldStudentNumber = user.getStudentNumber();
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                System.out.println("The read failed: " + firebaseError.getMessage());
-            }
-        });
-
-        setTitle("Edit Info");
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    System.out.println("The read failed: " + firebaseError.getMessage());
+                }
+            });
+        }
 
     }
 
+    /**
+     * Attempts to sign in or register the account specified by the login form.
+     * If there are form errors (invalid email, missing fields, etc.), the
+     * errors are presented and no actual login attempt is made.
+     */
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -131,6 +140,7 @@ public class EditInfoActivity extends AppCompatActivity {
         String firstName = mFirstNameView.getText().toString();
         String lastName = mLasttNameView.getText().toString();
         String studentNumber = mStudentNumberView.getText().toString();
+
 
         boolean cancel = false;
         View focusView = null;
@@ -278,18 +288,9 @@ public class EditInfoActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            final SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-            final SharedPreferences.Editor editor = sharedPref.edit();
 
-            editor.putString("email",mEmail);
-            editor.putString("firstName",mFirstName);
-            editor.putString("lastName",mLastName);
-            editor.putString("studentNumber",mStudentNumber);
-            editor.putString("password",mPassword);
-            editor.apply();
-
-            Firebase newPostRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
-            Users newUser = new Users(mEmail,mPassword,mFirstName,mLastName,mStudentNumber,sharedPref.getString("userID",""),sharedPref.getString("pushID",""),"online");
+            Firebase newPostRef = myFirebaseRef.child(pushId);
+            Users newUser = new Users(mEmail,mPassword,mFirstName,mLastName,mStudentNumber,userId,pushId,"offline");
             newPostRef.setValue(newUser);
 
             String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
@@ -301,7 +302,7 @@ public class EditInfoActivity extends AppCompatActivity {
                     +oldLastname+" - "+mLastName +" \n"
                     +oldEmail+" - "+mEmail +" \n"
                     +oldPassword+" - "+mPassword +" \n"
-                    +oldStudentNumber+" --- "+mStudentNumber);
+                    +oldStudentNumber+" - "+mStudentNumber);
             tempRef.child("user").setValue(sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
             tempRef.child("timestamp").setValue(timeStamp);
 
@@ -324,7 +325,7 @@ public class EditInfoActivity extends AppCompatActivity {
             //signUp Successful
             if (success) {
 //                Toast.makeText(EditInfoActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
-               Intent intent = new Intent(getBaseContext(),ProfileActivity.class);
+               Intent intent = new Intent(getBaseContext(),AdminProfileActivity.class);
                 startActivity(intent);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
@@ -338,6 +339,5 @@ public class EditInfoActivity extends AppCompatActivity {
             showProgress(false);
         }
     }
-
 }
 

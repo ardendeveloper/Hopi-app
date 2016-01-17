@@ -1,4 +1,4 @@
-package com.dev.hopi_app.Activity;
+package com.dev.hopi_app.Admin;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,38 +14,43 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.dev.hopi_app.Activity.ChatActivity;
+import com.dev.hopi_app.Activity.FriendRequestActivity;
+import com.dev.hopi_app.Activity.FriendsActivity;
+import com.dev.hopi_app.Activity.MapsActivity;
+import com.dev.hopi_app.Activity.ProfileActivity;
+import com.dev.hopi_app.Activity.UsersActivity;
+import com.dev.hopi_app.Adapter.AdminUserAdapter;
+import com.dev.hopi_app.Adapter.UserAdapter;
 import com.dev.hopi_app.LoginActivity;
 import com.dev.hopi_app.R;
 import com.dev.hopi_app.Users;
-import com.dev.hopi_app.Adapter.UserAdapter;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 
 import java.util.ArrayList;
 
-public class UsersActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class AdminUsersActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    final String SAVED_ADAPTER_ITEMS = "SAVED_ADAPTER_ITEMS";
     final String SAVED_ADAPTER_KEYS = "SAVED_ADAPTER_KEYS";
+
     private TextView tvEmail;
     private TextView tvName;
     private TextView tvStudentNumber;
-    Button btnSearch;
+
     Query mQuery;
-    UserAdapter mMyAdapter;
+    AdminUserAdapter mMyAdapter;
     ArrayList<Users> mAdapterItems = null;
     ArrayList<String> mAdapterKeys;
     SharedPreferences sharedPref;
-    Firebase myFirebaseRef;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_users);
+        setContentView(R.layout.admin_activity_users);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -54,26 +59,16 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_users);
         navigationView.setNavigationItemSelectedListener(this);
 
         Firebase.setAndroidContext(this);
-        myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
         mQuery = new Firebase("https://hopiiapp.firebaseio.com/users");
 
-        btnSearch = (Button)findViewById(R.id.btnSearch);
-        btnSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText input = (EditText)findViewById(R.id.txtSearch);
-                input.getText().toString();
-                mQuery = new Firebase("https://hopiiapp.firebaseio.com/users");
-            }
-        });
-
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_users);
-        mMyAdapter = new UserAdapter(mQuery, Users.class, mAdapterItems, mAdapterKeys);
+        mMyAdapter = new AdminUserAdapter(mQuery, Users.class, mAdapterItems, mAdapterKeys);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mMyAdapter);
 
@@ -88,6 +83,7 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         tvEmail.setText(sharedPref.getString("email",""));
         tvName.setText(sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
         tvStudentNumber.setText(sharedPref.getString("studentNumber",""));
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -95,23 +91,23 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_map) {
-            Intent intent = new Intent(this, MapsActivity.class);
+        if (id == R.id.nav_users_view) {
+            Intent intent = new Intent(this, AdminUsersActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_friend_request) {
-            Intent intent = new Intent(this, FriendRequestActivity.class);
+        } else if (id == R.id.nav_users_add) {
+            Intent intent = new Intent(this, AdminSignupActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_friends) {
-            Intent intent = new Intent(this, FriendsActivity.class);
+        } else if (id == R.id.nav_users_delete) {
+            Intent intent = new Intent(this, AdminDeleteActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_users) {
-            Intent intent = new Intent(this, UsersActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_chat) {
+        } else if (id == R.id.nav_chatroom) {
             Intent intent = new Intent(this, ChatActivity.class);
             startActivity(intent);
+        } else if (id == R.id.nav_audit_trail) {
+            Intent intent = new Intent(this, AdminAuditTrailActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_profile) {
-            Intent intent = new Intent(this, ProfileActivity.class);
+            Intent intent = new Intent(this, AdminProfileActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_logout) {
             Firebase ref = new Firebase("https://hopiiapp.firebaseio.com/");
@@ -134,28 +130,10 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         outState.putStringArrayList(SAVED_ADAPTER_KEYS, mMyAdapter.getKeys());
     }
 
-
     @Override
-    public void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
-        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
-        tempRef.child("status").setValue("offline");
-        Toast.makeText(UsersActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+        mMyAdapter.destroy();
     }
 
-    @Override
-    public void onStart(){
-        super.onStart();
-        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
-        tempRef.child("status").setValue("online");
-        Toast.makeText(UsersActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
-        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
-        tempRef.child("status").setValue("offline");
-        Toast.makeText(UsersActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
-    }
 }

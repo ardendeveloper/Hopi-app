@@ -51,39 +51,16 @@
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 
-
+        <!--<include layout="@layout/content_profile" />-->
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_users"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#e3e3e3"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:paddingBottom="30dp">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
         </android.support.v7.widget.RecyclerView>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/searchbar"
-            android:layout_marginLeft="50dp"
-            >
-
-            <EditText
-                android:layout_width="250dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/txtSearch"
-                android:layout_weight="1"
-                android:textColor="#fff" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Search"
-                android:id="@+id/btnSearch"
-                />
-        </LinearLayout>
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
@@ -93,7 +70,6 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
+        app:menu="@menu/admin_activity_main_drawer" />
 
 </android.support.v4.widget.DrawerLayout>
-

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dev.hopi_app">
+    package="com.dev.hopi_app" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -15,11 +15,11 @@
         android:icon="@drawable/hopi_icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,7 +33,7 @@
         <activity
             android:name=".SignupActivity"
             android:label="Sign Up"
-            android:theme="@style/AppTheme.Toolbar">
+            android:theme="@style/AppTheme.Toolbar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".LoginActivity" />
@@ -66,20 +66,66 @@
         <activity
             android:name=".Activity.EditInfoActivity"
             android:label="Edit Info"
-            android:theme="@style/AppTheme.Toolbar">
+            android:theme="@style/AppTheme.Toolbar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activity.ProfileActivity" />
         </activity>
-
         <activity
             android:name=".Activity.ChatActivity"
             android:label="@string/title_activity_chat"
-            android:theme="@style/AppTheme.Toolbar">
+            android:theme="@style/AppTheme.Toolbar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activity.FriendsActivity" />
         </activity>
+
+        <!-- ADMIN -->
+        <activity
+            android:name=".Admin.AdminMainActivity"
+            android:label="Admin Dashboard"
+            android:theme="@style/AppTheme" >
+        </activity>
+        <activity
+            android:name=".Admin.AdminUsersActivity"
+            android:label="Users List"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Admin.AdminSignupActivity"
+            android:label="Add User"
+            android:theme="@style/AppTheme.Toolbar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Admin.AdminMainActivity" />
+        </activity>
+        <activity
+            android:name=".Admin.AdminProfileActivity"
+            android:label="User Profile"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Admin.AdminEditInfoActivity"
+            android:label="Edit Profile"
+            android:theme="@style/AppTheme.Toolbar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Admin.AdminProfileActivity" />
+        </activity>
+        <activity
+            android:name=".Admin.AdminDeleteActivity"
+            android:label="User Profile"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Admin.AdminAuditTrailActivity"
+            android:label="Audit Trail"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Admin.AdminOnlineActivity"
+            android:label="Online Users"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Admin.AdminOfflineActivity"
+            android:label="Offline Users"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dev.hopi_app.Adapter.FriendRequestAdapter;
 import com.dev.hopi_app.Adapter.FriendsAdapter;
@@ -28,7 +29,6 @@ import java.util.ArrayList;
 
 public class FriendRequestActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    final String SAVED_ADAPTER_ITEMS = "SAVED_ADAPTER_ITEMS";
     final String SAVED_ADAPTER_KEYS = "SAVED_ADAPTER_KEYS";
     private TextView tvEmail;
     private TextView tvName;
@@ -39,7 +39,7 @@ public class FriendRequestActivity extends AppCompatActivity implements Navigati
     ArrayList<Users> mAdapterItems = null;
     ArrayList<String> mAdapterKeys;
     SharedPreferences sharedPref;
-
+    Firebase myFirebaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,20 +48,19 @@ public class FriendRequestActivity extends AppCompatActivity implements Navigati
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedPref.edit();
+        sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_friend_request);
         navigationView.setNavigationItemSelectedListener(this);
 
         Firebase.setAndroidContext(this);
+        myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
         mQuery = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/"+sharedPref.getString("userID",""));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_users);
@@ -125,9 +124,26 @@ public class FriendRequestActivity extends AppCompatActivity implements Navigati
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy(){
         super.onDestroy();
-        mMyAdapter.destroy();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(FriendRequestActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onStart(){
+        super.onStart();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("online");
+        Toast.makeText(FriendRequestActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(FriendRequestActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+    }
 }
