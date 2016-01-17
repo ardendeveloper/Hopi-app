@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.dev.hopi_app.R;
 import com.firebase.client.Firebase;
@@ -41,17 +42,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GeoFire geoFire;
     GeoQuery geoQuery;
     String tempKey;
-
     SharedPreferences sharedPref;
+    Firebase myFirebaseRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-
         tempKey = sharedPref.getString("firstName","")+"_"+sharedPref.getString("lastName","");
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -65,9 +64,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         Firebase.setAndroidContext(this);
+        myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
         geoFire = new GeoFire(new Firebase("https://hopiiapp.firebaseio.com/location"));
-
-
     }
 
     @Override
@@ -86,13 +84,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(18);
         mMap.animateCamera(zoom);
         mMap.getUiSettings().setMapToolbarEnabled(true);
-        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+//        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
     }
 
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
 
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("online");
+        Toast.makeText(MapsActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
         //greenwoods
 //        geoQuery = geoFire.queryAtLocation(new GeoLocation(14.552926, 121.102595), 0.5);
 
@@ -191,5 +192,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onConnectionFailed(ConnectionResult connectionResult){
 
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(MapsActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+
+        geoFire.removeLocation(tempKey);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+        Toast.makeText(MapsActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
     }
 }
