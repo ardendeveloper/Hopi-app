@@ -73,7 +73,7 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
 
         Firebase.setAndroidContext(this);
         myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
-        mQuery = new Firebase("https://hopiiapp.firebaseio.com/friends/" + sharedPref.getString("userID", ""));
+        mQuery = new Firebase("https://hopiiapp.firebaseio.com/friends/" + sharedPref.getString("pushID", ""));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_users);
         mMyAdapter = new FriendsAdapter(mQuery, Friends.class, mAdapterItems, mAdapterKeys);
@@ -88,10 +88,10 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
         tvCourse = (TextView) header.findViewById(R.id.sideCourse);
         tvImage = (ImageView) header.findViewById(R.id.sideImage);
 
-        tvEmail.setText(sharedPref.getString("email",""));
-        tvName.setText(sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
-        tvStudentNumber.setText(sharedPref.getString("studentNumber",""));
-        tvCourse.setText(sharedPref.getString("course","") + " - " + sharedPref.getString("year",""));
+        tvEmail.setText(sharedPref.getString("email", ""));
+        tvName.setText(sharedPref.getString("firstName", "") + " " + sharedPref.getString("lastName", ""));
+        tvStudentNumber.setText(sharedPref.getString("studentNumber", ""));
+        tvCourse.setText(sharedPref.getString("course", "") + " - " + sharedPref.getString("year", ""));
 
         if (sharedPref.getString("profileImage", "").equals("wew")) {
             tvImage.setImageResource(R.drawable.avatar);
@@ -102,53 +102,49 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
         Intent text = getIntent();
         final Bundle b = text.getExtras();
         if (b != null) {
-            final String userId = (String) b.get("USER_ID");
-            final Firebase ref = new Firebase("https://hopiiapp.firebaseio.com/users");
-            final Firebase postRef = new Firebase("https://hopiiapp.firebaseio.com/friends/" + sharedPref.getString("userID", ""));
-            Query queryRef = ref.orderByChild("userID").equalTo(userId);
-            queryRef.addValueEventListener(new ValueEventListener() {
+            final String pushID = (String) b.get("PUSH_ID");
+            final Firebase ref = new Firebase("https://hopiiapp.firebaseio.com/users/"+pushID);
+            final Firebase postRef = new Firebase("https://hopiiapp.firebaseio.com/friends/" + sharedPref.getString("pushID", ""));
+            ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     System.out.println("There are " + snapshot.getChildrenCount() + " User/s");
-                    for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                        final Users user = postSnapshot.getValue(Users.class);
+                    Users user = snapshot.getValue(Users.class);
+                    Friends newUser = new Friends(
+                            user.getEmail(),
+                            user.getPassword(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            user.getStudentNumber(),
+                            user.getUserID(),
+                            user.getPushID(),
+                            sharedPref.getString("userID", "") + user.getUserID());
+                    postRef.push().setValue(newUser);
 
-                        Friends newUser = new Friends(
-                                user.getEmail(),
-                                user.getPassword(),
-                                user.getFirstName(),
-                                user.getLastName(),
-                                user.getStudentNumber(),
-                                user.getUserID(),
-                                user.getPushID(),
-                                sharedPref.getString("userID", "") + userId);
-                        postRef.push().setValue(newUser);
+                    Firebase friendRef = new Firebase("https://hopiiapp.firebaseio.com/friends/" + pushID);
+                    Friends newFriend = new Friends(
+                            sharedPref.getString("email", ""),
+                            sharedPref.getString("password", ""),
+                            sharedPref.getString("firstName", ""),
+                            sharedPref.getString("lastName", ""),
+                            sharedPref.getString("studentNumber", ""),
+                            sharedPref.getString("userID", ""),
+                            sharedPref.getString("pushID", ""),
+                            sharedPref.getString("userID", "") + user.getUserID());
+                    friendRef.push().setValue(newFriend);
 
-                        Firebase friendRef = new Firebase("https://hopiiapp.firebaseio.com/friends/" + userId);
-                        Friends newFriend = new Friends(
-                                sharedPref.getString("email", ""),
-                                sharedPref.getString("password", ""),
-                                sharedPref.getString("firstName", ""),
-                                sharedPref.getString("lastName", ""),
-                                sharedPref.getString("studentNumber", ""),
-                                sharedPref.getString("userID", ""),
-                                sharedPref.getString("pushID", ""),
-                                sharedPref.getString("userID", "") + userId);
-                        friendRef.push().setValue(newFriend);
+                    String timeStamp = new SimpleDateFormat("MMM dd, yyyy - h:mm a").format(new Date());
+                    Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
+                    Firebase tempRef = auditRef.push();
+                    tempRef.child("action").setValue("Accepted Friend Request: \n From: " + user.getFirstName() + " " + user.getLastName() + "\n To: " + sharedPref.getString("firstName", "") + " " + sharedPref.getString("lastName", ""));
+                    tempRef.child("user").setValue(sharedPref.getString("firstName", "") + " " + sharedPref.getString("lastName", ""));
+                    tempRef.child("timestamp").setValue(timeStamp);
 
-                        String timeStamp = new SimpleDateFormat("MMM dd, yyyy - h:mm a").format(new Date());
-                        Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
-                        Firebase tempRef = auditRef.push();
-                        tempRef.child("action").setValue("Accepted Friend Request: \n From: " + user.getFirstName() + " " + user.getLastName() + "\n To: " + sharedPref.getString("firstName", "") + " " + sharedPref.getString("lastName", ""));
-                        tempRef.child("user").setValue(sharedPref.getString("firstName", "") + " " + sharedPref.getString("lastName", ""));
-                        tempRef.child("timestamp").setValue(timeStamp);
-
-                        Toast.makeText(FriendsActivity.this, "You are now friends with " + user.getFirstName(), Toast.LENGTH_SHORT).show();
-                    }
-                    Firebase deleteRef = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/" + sharedPref.getString("userID", "") + "/" + userId);
+                    Toast.makeText(FriendsActivity.this, "You are now friends with " + user.getFirstName(), Toast.LENGTH_SHORT).show();
+                    Firebase deleteRef = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/" + sharedPref.getString("pushID", "") + "/" + pushID);
                     deleteRef.removeValue();
-
                 }
+
 
                 @Override
                 public void onCancelled(FirebaseError firebaseError) {

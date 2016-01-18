@@ -32,14 +32,12 @@ import com.firebase.client.Query;
 import java.util.ArrayList;
 
 public class FriendRequestActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-
     final String SAVED_ADAPTER_KEYS = "SAVED_ADAPTER_KEYS";
     private TextView tvEmail;
     private TextView tvName;
     private TextView tvStudentNumber;
     private TextView tvCourse;
     private ImageView tvImage;
-
     Query mQuery;
     FriendRequestAdapter mMyAdapter;
     ArrayList<Users> mAdapterItems = null;
@@ -67,7 +65,7 @@ public class FriendRequestActivity extends AppCompatActivity implements Navigati
 
         Firebase.setAndroidContext(this);
         myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
-        mQuery = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/"+sharedPref.getString("userID",""));
+        mQuery = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/"+sharedPref.getString("pushID",""));
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_users);
         mMyAdapter = new FriendRequestAdapter(mQuery, Users.class, mAdapterItems, mAdapterKeys);

@@ -75,10 +75,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
 
         //JRU Reference
-        LatLng Reference = new LatLng(14.592571, 121.028441);
+//        LatLng Reference = new LatLng(14.592571, 121.028441);
 
         //greenwoods
-//        LatLng Reference = new LatLng(14.552989, 121.102596);
+        LatLng Reference = new LatLng(14.552989, 121.102596);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(Reference));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(18);
@@ -95,10 +95,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         tempRef.child("status").setValue("online");
         Toast.makeText(MapsActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
         //greenwoods
-//        geoQuery = geoFire.queryAtLocation(new GeoLocation(14.552926, 121.102595), 0.5);
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(14.552926, 121.102595), 0.5);
 
         //jru
-        geoQuery = geoFire.queryAtLocation(new GeoLocation(14.592571, 121.028441), 0.5);
+//        geoQuery = geoFire.queryAtLocation(new GeoLocation(14.592571, 121.028441), 0.5);
 
         geoFire.getLocation(tempKey, new LocationCallback() {
             @Override

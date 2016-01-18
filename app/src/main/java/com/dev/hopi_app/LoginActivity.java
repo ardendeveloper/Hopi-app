@@ -243,6 +243,13 @@ public class LoginActivity extends AppCompatActivity {
                                 intent.putExtra(extra_image, image);
                                 startActivity(intent);
 
+                                String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
+                                Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
+                                Firebase tempRef = auditRef.push();
+                                tempRef.child("action").setValue("Logged in: "+txtFirstname+" "+txtLastname+" .");
+                                tempRef.child("user").setValue(txtFirstname+" "+txtLastname);
+                                tempRef.child("timestamp").setValue(timeStamp);
+
                                 Toast.makeText(LoginActivity.this, "Welcome ! " + txtFirstname, Toast.LENGTH_SHORT).show();
                                 finish();
                             }
@@ -278,12 +285,7 @@ public class LoginActivity extends AppCompatActivity {
 
             //Login Successful
             if (success) {
-                String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
-                Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
-                Firebase tempRef = auditRef.push();
-                tempRef.child("action").setValue("Logged in: "+txtFirstname+" "+txtLastname+" .");
-                tempRef.child("user").setValue(txtFirstname+" "+txtLastname);
-                tempRef.child("timestamp").setValue(timeStamp);
+
 
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

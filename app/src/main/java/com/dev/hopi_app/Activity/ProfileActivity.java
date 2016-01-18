@@ -1,6 +1,7 @@
 package com.dev.hopi_app.Activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -12,6 +13,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
@@ -48,6 +50,8 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
     FloatingActionButton fab;
     String ActiveProfileName;
     SharedPreferences.Editor editor;
+    String pushID;
+    String unfriendName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,22 +82,23 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
         Intent text = getIntent();
         final Bundle b = text.getExtras();
         if (b != null) {
-            final String userId = (String) b.get("USER_ID");
-            final Firebase ref = new Firebase("https://hopiiapp.firebaseio.com/users");
-            Query queryRef = ref.orderByChild("userID").equalTo(userId);
-            queryRef.addValueEventListener(new ValueEventListener() {
+            pushID = (String) b.get("PUSH_ID");
+            final Firebase tempp = new Firebase("https://hopiiapp.firebaseio.com/users/" + pushID);
+            tempp.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                        final Users user = postSnapshot.getValue(Users.class);
-                        setTitle(user.getFirstName() + " " + user.getLastName());
-
-                        cEmail.setText(user.getEmail());
-                        cName.setText(user.getFirstName() + " " + user.getLastName());
-                        cStudentNumber.setText(user.getStudentNumber());
-
-                        ActiveProfileName = user.getFirstName() + " " + user.getLastName();
-                    }
+                    System.out.println("There are " + snapshot.getChildrenCount() + " wew");
+                    Users user = snapshot.getValue(Users.class);
+                    setTitle(user.getFirstName() + " " + user.getLastName());
+                    cEmail.setText(user.getEmail());
+                    cName.setText(user.getFirstName() + " " + user.getLastName());
+                    cStudentNumber.setText(user.getStudentNumber());
+                    ActiveProfileName = user.getFirstName() + " " + user.getLastName();
+//                        if (user.getProfileImage().equals("wew")) {
+//                            mImg.setImageResource(R.drawable.avatar);
+//                        } else {
+//                            mImg.setImageBitmap(decodeBase64(user.getFirstName()));
+//                        }
                 }
 
                 @Override
@@ -101,40 +106,17 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
                     System.out.println("The read failed: " + firebaseError.getMessage());
                 }
             });
-
+//
             //change icon if already friends
-            isAlreadyFriends(userId);
-            requestPending(userId);
+            isAlreadyFriends(pushID);
+            requestPending(pushID);
 
             //add friend
             fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
-//                    final Firebase postRef = myFirebaseRef.child("friends/"+sharedPref.getString("userID",""));
-//                    Query queryRef = ref.orderByChild("userID").equalTo(userId);
-//                    queryRef.addValueEventListener(new ValueEventListener() {
-//                        @Override
-//                        public void onDataChange(DataSnapshot snapshot) {
-//                                System.out.println("There are " + snapshot.getChildrenCount() + " User/s");
-//                                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-//                                    final Users user = postSnapshot.getValue(Users.class);
-//                                    System.out.println(user.getStudentNumber() + " - " + user.getEmail() + " - " + user.getPassword() + " - " + user.getFirstName() + " - " + user.getLastName());
-//                                    Users newUser = new Users(user.getEmail(),user.getPassword(),user.getFirstName(),user.getLastName(),user.getStudentNumber(),user.getUserID(),null);
-//                                    postRef.push().setValue(newUser);
-//                                    Toast.makeText(ProfileActivity.this, "You are now friends with "+user.getFirstName(), Toast.LENGTH_SHORT).show();
-//                                }
-//
-//                        }
-//
-//                        @Override
-//                        public void onCancelled(FirebaseError firebaseError) {
-//                            System.out.println("The read failed: " + firebaseError.getMessage());
-//                        }
-//                    });
-                    final Firebase postRef = myFirebaseRef.child("friend-requests/" + userId + "/" + sharedPref.getString("userID", ""));
-
+                    final Firebase postRef = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/" + pushID + "/" + sharedPref.getString("pushID", ""));
                     Friends newUser = new Friends(
                             sharedPref.getString("email", ""),
                             sharedPref.getString("password", ""),
@@ -173,6 +155,13 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
             cName.setText(sharedPref.getString("firstName", "") + " " + sharedPref.getString("lastName", ""));
             cStudentNumber.setText(sharedPref.getString("studentNumber", ""));
 
+            mImg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pickPhoto(v);
+                }
+            });
+
         }
 
 //Put Data on navigation Drawer Header
@@ -183,10 +172,10 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
         tvCourse = (TextView) header.findViewById(R.id.sideCourse);
         tvImage = (ImageView) header.findViewById(R.id.sideImage);
 
-        tvEmail.setText(sharedPref.getString("email",""));
-        tvName.setText(sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
-        tvStudentNumber.setText(sharedPref.getString("studentNumber",""));
-        tvCourse.setText(sharedPref.getString("course","") + " - " + sharedPref.getString("year",""));
+        tvEmail.setText(sharedPref.getString("email", ""));
+        tvName.setText(sharedPref.getString("firstName", "") + " " + sharedPref.getString("lastName", ""));
+        tvStudentNumber.setText(sharedPref.getString("studentNumber", ""));
+        tvCourse.setText(sharedPref.getString("course", "") + " - " + sharedPref.getString("year", ""));
 
         if (sharedPref.getString("profileImage", "").equals("wew")) {
             tvImage.setImageResource(R.drawable.avatar);
@@ -233,10 +222,9 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
         return true;
     }
 
-    public void isAlreadyFriends(String userId) {
-        final Firebase postRef = myFirebaseRef.child("friends/" + sharedPref.getString("userID", ""));
-        Query queryRef = postRef.orderByChild("userID").equalTo(userId);
-        queryRef.addValueEventListener(new ValueEventListener() {
+    public void isAlreadyFriends(final String pushID) {
+        final Firebase postRef = new Firebase("https://hopiiapp.firebaseio.com/friends/" + sharedPref.getString("pushID", ""));
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -244,7 +232,30 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
                     fab.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(ProfileActivity.this, "You are already friends!", Toast.LENGTH_SHORT).show();
+                            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case DialogInterface.BUTTON_POSITIVE:
+                                            postRef.removeValue();
+                                            Firebase friendTempRef = new Firebase("https://hopiiapp.firebaseio.com/friends/" + pushID);
+                                            friendTempRef.removeValue();
+                                            Toast.makeText(ProfileActivity.this, "You successfully unfriended " + ActiveProfileName, Toast.LENGTH_LONG).show();
+                                            Intent intent = new Intent(getBaseContext(), FriendsActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                            break;
+
+                                        case DialogInterface.BUTTON_NEGATIVE:
+
+                                            break;
+                                    }
+                                }
+                            };
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                            builder.setMessage("Click yes to unfriend "+ActiveProfileName).setPositiveButton("Yes", dialogClickListener)
+                                    .setNegativeButton("No", dialogClickListener).setIcon(R.drawable.hopi_icon).show();
                         }
                     });
                 }
@@ -257,10 +268,9 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
         });
     }
 
-    public void requestPending(String userId) {
-        final Firebase postRef = myFirebaseRef.child("friend-requests/" + sharedPref.getString("userID", "") + '/' + userId);
-        Query queryRef = postRef.orderByChild("userID").equalTo(userId);
-        queryRef.addValueEventListener(new ValueEventListener() {
+    public void requestPending(String pushID) {
+        final Firebase postRef = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/" + sharedPref.getString("pushID", "") + '/' + pushID);
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -363,4 +373,22 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
         return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
     }
 
+    private void createAndShowAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("My Title");
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                //TODO
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                //TODO
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }

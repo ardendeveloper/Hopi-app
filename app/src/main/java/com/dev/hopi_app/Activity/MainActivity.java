@@ -1,15 +1,18 @@
 package com.dev.hopi_app.Activity;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -195,8 +198,31 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID", ""));
         tempRef.child("status").setValue("online");
-//        Toast.makeText(MainActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
 
+        Firebase ref = new Firebase("https://hopiiapp.firebaseio.com/friend-requests/"+sharedPref.getString("pushID",""));
+        // Attach an listener to read the data at our posts reference
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                System.out.println("There are " + snapshot.getChildrenCount() + " friend requests.");
+                if (snapshot.getChildrenCount()>0){
+                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext());
+                    mBuilder.setSmallIcon(R.drawable.hopi_icon);
+                    mBuilder.setContentTitle("Hopi Alert!");
+                    mBuilder.setContentText("You have a new "+ snapshot.getChildrenCount() +" Friend Request!");
+
+                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                    Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    mBuilder.setSound(alarmSound);
+                    mNotificationManager.notify(0, mBuilder.build());
+                }
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
 
     }
 

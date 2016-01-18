@@ -59,7 +59,7 @@ public class FriendsAdapter extends FirebaseRecyclerAdapter<FriendsAdapter.ViewH
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                intent.putExtra("USER_ID",item.getUserID());
+                intent.putExtra("PUSH_ID",item.getPushID());
                 v.getContext().startActivity(intent);
 
 //                Toast.makeText(v.getContext(), item.getUserID(), Toast.LENGTH_SHORT).show();
