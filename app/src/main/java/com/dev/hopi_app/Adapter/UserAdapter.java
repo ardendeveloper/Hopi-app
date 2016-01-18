@@ -1,12 +1,17 @@
 package com.dev.hopi_app.Adapter;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +31,8 @@ public class UserAdapter extends FirebaseRecyclerAdapter<UserAdapter.ViewHolder,
         TextView cardEmail;
         TextView cardStudentNumber;
         TextView cardStatus;
+        TextView cardCourse;
+        ImageView cardImage;
 
         public ViewHolder(View view) {
             super(view);
@@ -33,6 +40,8 @@ public class UserAdapter extends FirebaseRecyclerAdapter<UserAdapter.ViewHolder,
             cardEmail = (TextView) view.findViewById(R.id.cardEmail);
             cardStudentNumber = (TextView) view.findViewById(R.id.cardStudentNumber);
             cardStatus = (TextView) view.findViewById(R.id.cardStatus);
+            cardCourse = (TextView) view.findViewById(R.id.cardCourse);
+            cardImage = (ImageView) view.findViewById(R.id.cardImage);
         }
     }
 
@@ -54,6 +63,13 @@ public class UserAdapter extends FirebaseRecyclerAdapter<UserAdapter.ViewHolder,
         holder.cardEmail.setText(item.getEmail());
         holder.cardStudentNumber.setText(item.getStudentNumber());
         holder.cardStatus.setText(item.getStatus());
+        holder.cardCourse.setText(item.getCourse()+ " - "+item.getYear());
+        if (item.getProfileImage().equals("wew")) {
+            holder.cardImage.setImageResource(R.drawable.avatar);
+        } else {
+            holder.cardImage.setImageBitmap(decodeBase64(item.getProfileImage()));
+        }
+        holder.cardCourse.setText(item.getCourse()+ " - "+item.getYear());
 
         holder.cardName.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +98,11 @@ public class UserAdapter extends FirebaseRecyclerAdapter<UserAdapter.ViewHolder,
 
     @Override protected void itemMoved(Users item, String key, int oldPosition, int newPosition) {
         Log.d("UserAdapter", "Moved an item.");
+    }
+
+    public static Bitmap decodeBase64(String input) {
+        byte[] decodedByte = Base64.decode(input, 0);
+        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
     }
 
 }

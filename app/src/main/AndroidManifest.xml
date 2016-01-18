@@ -79,53 +79,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activity.FriendsActivity" />
         </activity>
-
-        <!-- ADMIN -->
-        <activity
-            android:name=".Admin.AdminMainActivity"
-            android:label="Admin Dashboard"
-            android:theme="@style/AppTheme" >
-        </activity>
-        <activity
-            android:name=".Admin.AdminUsersActivity"
-            android:label="Users List"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".Admin.AdminSignupActivity"
-            android:label="Add User"
-            android:theme="@style/AppTheme.Toolbar" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Admin.AdminMainActivity" />
-        </activity>
-        <activity
-            android:name=".Admin.AdminProfileActivity"
-            android:label="User Profile"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".Admin.AdminEditInfoActivity"
-            android:label="Edit Profile"
-            android:theme="@style/AppTheme.Toolbar" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Admin.AdminProfileActivity" />
-        </activity>
-        <activity
-            android:name=".Admin.AdminDeleteActivity"
-            android:label="User Profile"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".Admin.AdminAuditTrailActivity"
-            android:label="Audit Trail"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".Admin.AdminOnlineActivity"
-            android:label="Online Users"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".Admin.AdminOfflineActivity"
-            android:label="Offline Users"
-            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

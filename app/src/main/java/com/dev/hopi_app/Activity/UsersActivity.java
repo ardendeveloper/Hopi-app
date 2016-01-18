@@ -3,6 +3,8 @@ package com.dev.hopi_app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,10 +14,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +37,8 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
     private TextView tvEmail;
     private TextView tvName;
     private TextView tvStudentNumber;
+    private TextView tvCourse;
+    private ImageView tvImage;
     Button btnSearch;
     Query mQuery;
     UserAdapter mMyAdapter;
@@ -77,17 +83,26 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mMyAdapter);
 
-        final SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
 
         //Put Data on navigation Drawer Header
         View header = navigationView.getHeaderView(0);
         tvEmail = (TextView) header.findViewById(R.id.sideEmail);
         tvName = (TextView) header.findViewById(R.id.sideName);
         tvStudentNumber = (TextView) header.findViewById(R.id.sideStudentNumber);
+        tvCourse = (TextView) header.findViewById(R.id.sideCourse);
+        tvImage = (ImageView) header.findViewById(R.id.sideImage);
 
         tvEmail.setText(sharedPref.getString("email",""));
         tvName.setText(sharedPref.getString("firstName","")+" "+sharedPref.getString("lastName",""));
         tvStudentNumber.setText(sharedPref.getString("studentNumber",""));
+        tvCourse.setText(sharedPref.getString("course","") + " - " + sharedPref.getString("year",""));
+
+        if (sharedPref.getString("profileImage", "").equals("wew")) {
+            tvImage.setImageResource(R.drawable.avatar);
+        } else {
+            tvImage.setImageBitmap(decodeBase64(sharedPref.getString("profileImage", "")));
+        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -157,5 +172,10 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
         Toast.makeText(UsersActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+    }
+
+    public static Bitmap decodeBase64(String input) {
+        byte[] decodedByte = Base64.decode(input, 0);
+        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
     }
 }

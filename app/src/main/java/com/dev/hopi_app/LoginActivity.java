@@ -22,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dev.hopi_app.Activity.MainActivity;
-import com.dev.hopi_app.Admin.AdminMainActivity;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -42,6 +41,9 @@ public class LoginActivity extends AppCompatActivity {
     public final static String extra_name = "name";
     public final static String extra_email = "email";
     public final static String extra_studentnumber = "student_number";
+    public final static String extra_course = "course";
+    public final static String extra_year = "year";
+    public final static String extra_image = "image";
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -176,18 +178,15 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
         private final String mEmail;
         private final String mPassword;
-        private String txtEmail, txtPassword, txtFirstname, txtLastname, txtStudentnumber;
+        private String txtEmail, txtPassword, txtFirstname, txtLastname, txtStudentnumber, txtCourse, txtYear, image;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -218,9 +217,12 @@ public class LoginActivity extends AppCompatActivity {
                                 editor.putString("firstName", user.getFirstName());
                                 editor.putString("lastName", user.getLastName());
                                 editor.putString("studentNumber", user.getStudentNumber());
+                                editor.putString("profileImage", user.getProfileImage());
                                 editor.putString("userID", user.getUserID());
                                 editor.putString("password", user.getPassword());
                                 editor.putString("pushID", user.getPushID());
+                                editor.putString("course", user.getCourse());
+                                editor.putString("year", user.getYear());
                                 editor.apply();
 
                                 txtEmail = user.getEmail();
@@ -228,16 +230,17 @@ public class LoginActivity extends AppCompatActivity {
                                 txtFirstname = user.getFirstName();
                                 txtLastname = user.getLastName();
                                 txtStudentnumber = user.getStudentNumber();
+                                txtCourse = user.getCourse();
+                                txtYear = user.getYear();
+                                image = user.getProfileImage();
 
-                                if (mEmail.equals("admin@admin.com")) {
-                                    intent = new Intent(getBaseContext(), AdminMainActivity.class);
-                                } else {
-                                    intent = new Intent(getBaseContext(), MainActivity.class);
-
-                                }
+                                intent = new Intent(getBaseContext(), MainActivity.class);
                                 intent.putExtra(extra_name, txtFirstname + " " + txtLastname);
                                 intent.putExtra(extra_email, txtEmail);
                                 intent.putExtra(extra_studentnumber, txtStudentnumber);
+                                intent.putExtra(extra_course, txtCourse);
+                                intent.putExtra(extra_year, txtYear);
+                                intent.putExtra(extra_image, image);
                                 startActivity(intent);
 
                                 Toast.makeText(LoginActivity.this, "Welcome ! " + txtFirstname, Toast.LENGTH_SHORT).show();
@@ -275,12 +278,12 @@ public class LoginActivity extends AppCompatActivity {
 
             //Login Successful
             if (success) {
-//                String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
-//                Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
-//                Firebase tempRef = auditRef.push();
-//                tempRef.child("action").setValue("Logged in: "+txtFirstname+" "+txtLastname+" .");
-//                tempRef.child("user").setValue(txtFirstname+" "+txtLastname);
-//                tempRef.child("timestamp").setValue(timeStamp);
+                String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
+                Firebase auditRef = new Firebase("https://hopiiapp.firebaseio.com/audit-trail");
+                Firebase tempRef = auditRef.push();
+                tempRef.child("action").setValue("Logged in: "+txtFirstname+" "+txtLastname+" .");
+                tempRef.child("user").setValue(txtFirstname+" "+txtLastname);
+                tempRef.child("timestamp").setValue(timeStamp);
 
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

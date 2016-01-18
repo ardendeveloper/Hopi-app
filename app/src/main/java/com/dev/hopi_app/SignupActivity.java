@@ -33,6 +33,9 @@ public class SignupActivity extends AppCompatActivity {
     private EditText mFirstNameView;
     private EditText mLasttNameView;
     private EditText mStudentNumberView;
+    private EditText mCourseVIew;
+    private EditText mYearView;
+
     private View mProgressView;
     private View mLoginFormView;
     private Firebase myFirebaseRef;
@@ -49,6 +52,8 @@ public class SignupActivity extends AppCompatActivity {
         mFirstNameView = (EditText) findViewById(R.id.firstName);
         mLasttNameView = (EditText) findViewById(R.id.lastName);
         mStudentNumberView = (EditText) findViewById(R.id.studentNumber);
+        mCourseVIew = (EditText) findViewById(R.id.course);
+        mYearView = (EditText) findViewById(R.id.year);
 
         Button mSignUpButton = (Button) findViewById(R.id.btnSignUp);
         mSignUpButton.setOnClickListener(new OnClickListener() {
@@ -64,13 +69,6 @@ public class SignupActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Firebase.setAndroidContext(this);
-
-        final EditText email = (EditText) findViewById(R.id.email);
-        final EditText password = (EditText) findViewById(R.id.password);
-        final EditText firstName = (EditText) findViewById(R.id.firstName);
-        final EditText lastName = (EditText) findViewById(R.id.lastName);
-        final EditText studentNumber = (EditText) findViewById(R.id.studentNumber);
-
         myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
 
         // UPDATING DRAFT
@@ -109,6 +107,8 @@ public class SignupActivity extends AppCompatActivity {
         mFirstNameView.setError(null);
         mLasttNameView.setError(null);
         mStudentNumberView.setError(null);
+        mCourseVIew.setError(null);
+        mYearView.setError(null);
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
@@ -116,6 +116,8 @@ public class SignupActivity extends AppCompatActivity {
         String firstName = mFirstNameView.getText().toString();
         String lastName = mLasttNameView.getText().toString();
         String studentNumber = mStudentNumberView.getText().toString();
+        String course = mCourseVIew.getText().toString();
+        String year = mYearView.getText().toString();
 
 
         boolean cancel = false;
@@ -173,6 +175,20 @@ public class SignupActivity extends AppCompatActivity {
             cancel = true;
         }
 
+        //check course
+        if (TextUtils.isEmpty(course)) {
+            mCourseVIew.setError(getString(R.string.error_field_required));
+            focusView = mCourseVIew;
+            cancel = true;
+        }
+
+        //check year
+        if (TextUtils.isEmpty(year)) {
+            mYearView.setError(getString(R.string.error_field_required));
+            focusView = mYearView;
+            cancel = true;
+        }
+
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -181,7 +197,7 @@ public class SignupActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password, firstName, lastName, studentNumber);
+            mAuthTask = new UserLoginTask(email, password, firstName, lastName, studentNumber, course, year);
             mAuthTask.execute((Void) null);
         }
     }
@@ -251,14 +267,17 @@ public class SignupActivity extends AppCompatActivity {
         private final String mFirstName;
         private final String mLastName;
         private final String mStudentNumber;
-        private String postId;
+        private final String mCourse;
+        private final String mYear;
 
-        UserLoginTask(String email, String password, String firstName, String lastName, String studentNumber) {
+        UserLoginTask(String email, String password, String firstName, String lastName, String studentNumber, String course, String year) {
             mEmail = email;
             mPassword = password;
             mFirstName = firstName;
             mLastName = lastName;
             mStudentNumber = studentNumber;
+            mCourse = course;
+            mYear = year;
         }
 
         @Override
@@ -271,7 +290,7 @@ public class SignupActivity extends AppCompatActivity {
                 public void onSuccess(Map<String, Object> result) {
                     System.out.println("Successfully created user account with uid: " + result.get("uid"));
                     Firebase newPostRef = myFirebaseRef.push();
-                    Users newUser = new Users(mEmail,mPassword,mFirstName,mLastName,mStudentNumber,result.get("uid").toString(),newPostRef.getKey(),"offline");
+                    Users newUser = new Users(mEmail,mPassword,mFirstName,mLastName,mStudentNumber,result.get("uid").toString(),newPostRef.getKey(),"offline","wew",mCourse,mYear);
                     newPostRef.setValue(newUser);
 
                     String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());
@@ -280,17 +299,13 @@ public class SignupActivity extends AppCompatActivity {
                     tempRef.child("action").setValue("New user: "+mFirstName+" "+mLastName+" has been registered.");
                     tempRef.child("user").setValue(mFirstName+" "+mLastName);
                     tempRef.child("timestamp").setValue(timeStamp);
-                    // Get the unique ID generated by push()
-//                    postId = newPostRef.getKey();
-                    Firebase ref = new Firebase("https://hopiiapp.firebaseio.com/");
-                    Firebase offlineRef = ref.child("offline/"+newPostRef.getKey());
-                    Users offlineUser = new Users(mEmail,mPassword,mFirstName,mLastName,mStudentNumber,result.get("uid").toString(),newPostRef.getKey(),"offline");
-                    offlineRef.setValue(offlineUser);
 
+                    Toast.makeText(SignupActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
                 }
                 @Override
                 public void onError(FirebaseError firebaseError) {
-                    // there was an error
+                    Toast.makeText(getBaseContext(), firebaseError.toString(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -312,8 +327,7 @@ public class SignupActivity extends AppCompatActivity {
 
             //signUp Successful
             if (success) {
-                Toast.makeText(SignupActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
-                onBackPressed();
+
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

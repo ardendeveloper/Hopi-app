@@ -289,7 +289,7 @@ public class EditInfoActivity extends AppCompatActivity {
             editor.apply();
 
             Firebase newPostRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
-            Users newUser = new Users(mEmail,mPassword,mFirstName,mLastName,mStudentNumber,sharedPref.getString("userID",""),sharedPref.getString("pushID",""),"online");
+            Users newUser = new Users(mEmail,mPassword,mFirstName,mLastName,mStudentNumber,sharedPref.getString("userID",""),sharedPref.getString("pushID",""),sharedPref.getString("status",""),sharedPref.getString("profileImage",""),sharedPref.getString("course",""),sharedPref.getString("year",""));
             newPostRef.setValue(newUser);
 
             String timeStamp = new SimpleDateFormat("MMM dd yyyy - h.mm a").format(new Date());

@@ -12,8 +12,11 @@ public class Users {
     private String userID;
     private String pushID;
     private String status;
+    private String profileImage;
+    private String course;
+    private String year;
 
-    public Users(String email, String password, String firstName, String lastName, String studentNumber, String userID, String pushID,String status) {
+    public Users(String email, String password, String firstName, String lastName, String studentNumber, String userID, String pushID,String status,String profileImage, String course, String year) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
@@ -22,9 +25,36 @@ public class Users {
         this.userID = userID;
         this.pushID = pushID;
         this.status = status;
+        this.profileImage = profileImage;
+        this.course = course;
+        this.year = year;
     }
 
     public Users(){}
+
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 
     public String getPushID() {
         return pushID;
