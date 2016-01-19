@@ -203,7 +203,7 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
         super.onDestroy();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID", ""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(FriendsActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(FriendsActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -211,7 +211,7 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
         super.onStart();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID", ""));
         tempRef.child("status").setValue("online");
-        Toast.makeText(FriendsActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(FriendsActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -219,7 +219,7 @@ public class FriendsActivity extends AppCompatActivity implements NavigationView
         super.onPause();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID", ""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(FriendsActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(FriendsActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
     }
 
     public static Bitmap decodeBase64(String input) {

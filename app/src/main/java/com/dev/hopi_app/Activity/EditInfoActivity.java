@@ -339,5 +339,29 @@ public class EditInfoActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+//        Toast.makeText(FriendRequestActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("online");
+//        Toast.makeText(FriendRequestActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("offline");
+//        Toast.makeText(FriendRequestActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+    }
+
 }
 

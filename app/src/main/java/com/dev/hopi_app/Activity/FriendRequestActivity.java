@@ -141,7 +141,7 @@ public class FriendRequestActivity extends AppCompatActivity implements Navigati
         super.onDestroy();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(FriendRequestActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(FriendRequestActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -149,7 +149,7 @@ public class FriendRequestActivity extends AppCompatActivity implements Navigati
         super.onStart();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("online");
-        Toast.makeText(FriendRequestActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(FriendRequestActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -157,7 +157,7 @@ public class FriendRequestActivity extends AppCompatActivity implements Navigati
         super.onPause();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(FriendRequestActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(FriendRequestActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
     }
 
     public static Bitmap decodeBase64(String input) {

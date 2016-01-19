@@ -159,7 +159,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onDestroy();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(ChatActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(ChatActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -167,7 +167,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onStart();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("online");
-        Toast.makeText(ChatActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(ChatActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -175,7 +175,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onPause();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(ChatActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(ChatActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
     }
 
 }

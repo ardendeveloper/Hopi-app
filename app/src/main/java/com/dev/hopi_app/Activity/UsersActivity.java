@@ -27,8 +27,12 @@ import com.dev.hopi_app.LoginActivity;
 import com.dev.hopi_app.R;
 import com.dev.hopi_app.Users;
 import com.dev.hopi_app.Adapter.UserAdapter;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -54,7 +58,7 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         setContentView(R.layout.activity_users);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -68,22 +72,45 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
         mQuery = new Firebase("https://hopiiapp.firebaseio.com/users");
 
-        btnSearch = (Button)findViewById(R.id.btnSearch);
-        btnSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText input = (EditText)findViewById(R.id.txtSearch);
-                input.getText().toString();
-                mQuery = new Firebase("https://hopiiapp.firebaseio.com/users");
-            }
-        });
-
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_users);
         mMyAdapter = new UserAdapter(mQuery, Users.class, mAdapterItems, mAdapterKeys);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mMyAdapter);
 
-        sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        btnSearch = (Button)findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText input = (EditText)findViewById(R.id.txtSearch);
+                String name = input.getText().toString();
+                mQuery = new Firebase("https://hopiiapp.firebaseio.com/users");
+                System.out.println(name);
+                Query queryRef = mQuery.orderByChild("firstName").equalTo(name);
+                queryRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        System.out.println("Value: "+snapshot.getKey());
+                        for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                            Users user = postSnapshot.getValue(Users.class);
+                            System.out.println(user.getPushID());
+                            Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
+                            intent.putExtra("PUSH_ID",user.getPushID());
+                            startActivity(intent);
+                        }
+
+                        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_users);
+                        mMyAdapter = new UserAdapter(mQuery, Users.class, mAdapterItems, mAdapterKeys);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
+                        recyclerView.setAdapter(mMyAdapter);
+                    }
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        System.out.println("The read failed: " + firebaseError.getMessage());
+                        Toast.makeText(UsersActivity.this, "No Record Found! Please take not that first name is case sensitive.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
 
         //Put Data on navigation Drawer Header
         View header = navigationView.getHeaderView(0);
@@ -155,7 +182,7 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         super.onDestroy();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(UsersActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+       // Toast.makeText(UsersActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -163,7 +190,7 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         super.onStart();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("online");
-        Toast.makeText(UsersActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(UsersActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -171,7 +198,7 @@ public class UsersActivity extends AppCompatActivity implements NavigationView.O
         super.onPause();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(UsersActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(UsersActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
     }
 
     public static Bitmap decodeBase64(String input) {

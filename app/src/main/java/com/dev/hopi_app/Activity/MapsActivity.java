@@ -65,7 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Firebase.setAndroidContext(this);
         myFirebaseRef = new Firebase("https://hopiiapp.firebaseio.com/users");
-        geoFire = new GeoFire(new Firebase("https://hopiiapp.firebaseio.com/location"));
+        geoFire = new GeoFire(new Firebase("https://hopiiapp.firebaseio.com/location/"));
     }
 
     @Override
@@ -91,9 +91,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mGoogleApiClient.connect();
         super.onStart();
 
-        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
-        tempRef.child("status").setValue("online");
-        Toast.makeText(MapsActivity.this, "Start!!", Toast.LENGTH_SHORT).show();
         //greenwoods
         geoQuery = geoFire.queryAtLocation(new GeoLocation(14.552926, 121.102595), 0.5);
 
@@ -164,6 +161,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 System.err.println("There was an error getting the GeoFire location: " + firebaseError);
             }
         });
+
+        Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
+        tempRef.child("status").setValue("online");
+
     }
 
     protected void onStop() {
@@ -183,7 +184,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLocationChanged(Location location) {
         Double mLat = location.getLatitude();
         Double mLong = location.getLongitude();
-        geoFire.setLocation(tempKey, new GeoLocation(mLat, mLong));
+//        geoFire.setLocation(tempKey, new GeoLocation(mLat, mLong));
+
+        geoFire.setLocation(tempKey, new GeoLocation(mLat, mLong), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, FirebaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+//                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
     }
 
     public void onConnectionSuspended(int i){
@@ -199,7 +211,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onDestroy();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(MapsActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MapsActivity.this, "Destroy!!", Toast.LENGTH_SHORT).show();
 
         geoFire.removeLocation(tempKey);
     }
@@ -209,6 +221,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onPause();
         Firebase tempRef = myFirebaseRef.child(sharedPref.getString("pushID",""));
         tempRef.child("status").setValue("offline");
-        Toast.makeText(MapsActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MapsActivity.this, "Pause!!", Toast.LENGTH_SHORT).show();
     }
 }
